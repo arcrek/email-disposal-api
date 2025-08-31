@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email API Admin</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Email API Administration</h1>
+        
+        <div class="stats-panel">
+            <h2>Statistics</h2>
+            <div id="stats-content">
+                <div class="stat-item">
+                    <div><strong>...</strong></div>
+                    <div>Loading...</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="email-panel">
+            <h2>Email Management</h2>
+            
+            <div class="actions">
+                <button onclick="loadEmails()" class="btn-primary">Refresh</button>
+                <button onclick="exportEmails()" class="btn-secondary">Export</button>
+                <input type="file" id="import-file" accept=".txt" style="display:none" onchange="importEmails(this)">
+                <button onclick="document.getElementById('import-file').click()" class="btn-secondary">Bulk Import</button>
+                <button onclick="clearLocked()" class="btn-warning">Clear Locked</button>
+            </div>
+            
+            <div class="search-section">
+                <input type="text" id="search-input" placeholder="Search emails..." onkeyup="searchEmails()">
+                <button onclick="searchEmails()" class="btn-primary">Search</button>
+            </div>
+            
+            <div class="add-email">
+                <input type="email" id="new-email" placeholder="Enter email address">
+                <button onclick="addEmail()" class="btn-primary">Add Email</button>
+            </div>
+            
+            <div class="email-table-container">
+                <table id="email-table">
+                    <thead>
+                        <tr>
+                            <th><input type="checkbox" onchange="toggleAllEmails(this)"></th>
+                            <th>Email</th>
+                            <th>Status</th>
+                            <th>Created</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="email-table-body">
+                        <tr><td colspan="5">
+                            <div style="text-align: center; padding: 20px;">
+                                <div>Loading emails...</div>
+                                <div style="font-size: 12px; color: #666; margin-top: 5px;">Please wait</div>
+                            </div>
+                        </td></tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="pagination">
+                <button onclick="changePage(-1)" class="btn-secondary" id="prev-btn">Previous</button>
+                <span id="page-info">Page 1 of 1</span>
+                <button onclick="changePage(1)" class="btn-secondary" id="next-btn">Next</button>
+                <select id="page-size" onchange="changePageSize()">
+                    <option value="50">50 per page</option>
+                    <option value="100" selected>100 per page</option>
+                    <option value="250">250 per page</option>
+                    <option value="500">500 per page</option>
+                </select>
+            </div>
+            
+            <div class="bulk-actions">
+                <button onclick="bulkDeleteSelected()" class="btn-danger">Delete Selected</button>
+                <span id="selected-count">0 selected</span>
+            </div>
+            
+            <div class="save-section">
+                <span id="save-status"></span>
+            </div>
+        </div>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>
