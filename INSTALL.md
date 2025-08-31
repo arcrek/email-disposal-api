@@ -47,6 +47,9 @@ Database Password: [your_generated_password]
    setup.php
    init.php
    README.md
+   INSTALL.md
+   CHANGELOG.md
+   project-summary.mdc
    ```
 
 #### Set File Permissions

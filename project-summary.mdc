@@ -52,10 +52,7 @@ High-performance email API system for cPanel hosting that serves random emails f
 │   ├── style.css                     # Responsive styling
 │   ├── fast_load.php                 # Ultra-fast email loading
 │   ├── quick_stats.php               # Cached statistics
-│   ├── load_emails_paginated.php     # Fallback pagination
-│   ├── load_emails.php               # Legacy file loading
 │   ├── save_emails.php               # File operations
-│   ├── stats.php                     # Standard statistics
 │   └── bulk_operations.php           # Bulk CRUD operations
 ├── 📁 data/
 │   └── email.txt                     # Email data source
@@ -141,7 +138,6 @@ $emails = $hasMore ? array_slice($results, 0, 50) : $results;
 - **GET /admin/fast_load.php**: Ultra-fast email pagination
 - **GET /admin/quick_stats.php**: Cached statistics with HTTP headers
 - **POST /admin/bulk_operations.php**: Bulk CRUD operations
-- **GET /admin/stats.php**: Standard statistics
 - **POST /admin/save_emails.php**: File save operations
 
 ## Security Features

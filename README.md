@@ -25,9 +25,10 @@ public_html/
 │   ├── index.html
 │   ├── script.js
 │   ├── style.css
-│   ├── load_emails.php
+│   ├── fast_load.php
+│   ├── quick_stats.php
 │   ├── save_emails.php
-│   └── stats.php
+│   └── bulk_operations.php
 ├── data/
 │   └── email.txt
 ├── .htaccess
