@@ -231,11 +231,10 @@ class EmailManager {
             $params[] = "%{$search}%";
         }
         
-        // Optimized single query with SQL_CALC_FOUND_ROWS for better performance
+        // Ultra-fast pagination - get data first, estimate total
         $stmt = $this->pdo->prepare("
-            SELECT SQL_CALC_FOUND_ROWS 
-                id, email, is_locked, locked_at, 
-                DATE_FORMAT(created_at, '%Y-%m-%d %H:%i') as created_display
+            SELECT id, email, is_locked, locked_at, 
+                   DATE_FORMAT(created_at, '%Y-%m-%d %H:%i') as created_display
             FROM emails 
             {$searchCondition}
             ORDER BY id DESC 
@@ -243,21 +242,36 @@ class EmailManager {
         ");
         
         $queryParams = $params;
-        $queryParams[] = $limit;
+        $queryParams[] = $limit + 1; // Get one extra to check if there are more
         $queryParams[] = $offset;
         $stmt->execute($queryParams);
-        $emails = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $allEmails = $stmt->fetchAll(PDO::FETCH_ASSOC);
         
-        // Get total count from last query
-        $totalStmt = $this->pdo->query("SELECT FOUND_ROWS()");
-        $total = $totalStmt->fetchColumn();
+        $hasMore = count($allEmails) > $limit;
+        $emails = $hasMore ? array_slice($allEmails, 0, $limit) : $allEmails;
+        
+        // Fast total estimation for large datasets
+        if (empty($search) && $page <= 5) {
+            // Use cached stats for first few pages
+            $stats = $this->getStats();
+            $total = $stats['total'];
+        } else {
+            // Estimate total based on current page
+            if ($hasMore) {
+                $total = ($page * $limit) + 1; // At least one more page
+            } else {
+                $total = $offset + count($emails);
+            }
+        }
         
         return [
             'emails' => $emails,
             'total' => (int)$total,
             'page' => $page,
             'limit' => $limit,
-            'pages' => ceil($total / $limit)
+            'pages' => $hasMore ? $page + 1 : $page,
+            'hasMore' => $hasMore,
+            'estimated' => !empty($search) || $page > 5
         ];
     }
     

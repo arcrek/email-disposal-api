@@ -1,0 +1,56 @@
+# Email API .htaccess Configuration
+
+# Security Headers
+Header always set X-Content-Type-Options nosniff
+Header always set X-Frame-Options DENY
+Header always set X-XSS-Protection "1; mode=block"
+
+# Disable directory browsing
+Options -Indexes
+
+# Protect sensitive files
+<Files ~ "\.(txt|log|backup)$">
+    Order deny,allow
+    Deny from all
+</Files>
+
+# Protect data directory
+<Directory "data">
+    Order deny,allow
+    Deny from all
+</Directory>
+
+# Clean URLs for API
+RewriteEngine On
+
+# API endpoint routing
+RewriteRule ^api/email/?$ api/email.php [L]
+
+# Admin panel routing (optional clean URLs)
+RewriteRule ^admin/?$ admin/index.html [L]
+
+# Enable compression for performance
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/css text/javascript application/javascript application/json
+</IfModule>
+
+# Cache static files
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType text/css "access plus 1 month"
+    ExpiresByType application/javascript "access plus 1 month"
+    ExpiresByType text/html "access plus 1 hour"
+</IfModule>
+
+# Limit request size to prevent abuse
+LimitRequestBody 1048576
+
+# Rate limiting (if mod_evasive is available)
+<IfModule mod_evasive24.c>
+    DOSHashTableSize    2048
+    DOSPageCount        10
+    DOSPageInterval     1
+    DOSSiteCount        50
+    DOSSiteInterval     1
+    DOSBlockingPeriod   60
+</IfModule>

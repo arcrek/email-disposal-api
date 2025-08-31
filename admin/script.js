@@ -4,18 +4,21 @@ let pageSize = 100;
 let currentSearch = '';
 let selectedEmails = new Set();
 
-// Optimized loading - lazy load emails, immediate stats
+// Lightning-fast loading strategy
 document.addEventListener('DOMContentLoaded', function() {
-    // Load stats immediately (fast query)
-    loadStats();
+    // Immediate loading with smaller page size for speed
+    pageSize = 50; // Start with smaller pages
     
-    // Lazy load emails after short delay to prioritize UI responsiveness
-    setTimeout(loadEmails, 100);
+    // Load stats and emails in parallel for faster perceived performance
+    Promise.all([
+        loadStats(),
+        loadEmails()
+    ]);
     
-    // Auto-refresh stats every 60 seconds (reduced frequency)
+    // Auto-refresh stats every 60 seconds
     setInterval(loadStats, 60000);
     
-    // Optimized debounced search with longer delay
+    // Optimized search with reduced delay for responsiveness
     let searchTimeout;
     document.getElementById('search-input').addEventListener('input', function() {
         clearTimeout(searchTimeout);
@@ -25,7 +28,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 currentPage = 1;
                 loadEmails();
             }
-        }, 800); // Increased delay to reduce API calls
+        }, 600); // Reduced delay for faster response
     });
 });
 
@@ -46,7 +49,8 @@ async function loadEmails() {
             search: currentSearch
         });
         
-        const response = await fetch(`load_emails_paginated.php?${params}`);
+        // Use fast endpoint for better performance
+        const response = await fetch(`fast_load.php?${params}`);
         const result = await response.json();
         
         if (result.success) {
@@ -71,20 +75,20 @@ function displayEmailTable(data) {
         return;
     }
     
-    // Optimized rendering with pre-formatted data
+    // Ultra-fast rendering with minimal processing
     const rows = [];
     for (const email of data.emails) {
-        const status = email.is_locked ? 'Locked' : 'Available';
-        const statusClass = email.is_locked ? 'status-locked' : 'status-available';
-        const createdDisplay = email.created_display || new Date(email.created_at).toLocaleDateString();
+        const status = email.status || (email.is_locked ? 'Locked' : 'Available');
+        const statusClass = email.statusClass || (email.is_locked ? 'status-locked' : 'status-available');
         const isSelected = selectedEmails.has(parseInt(email.id));
+        const displayEmail = email.email.length > 35 ? email.email.substring(0, 35) + '...' : email.email;
         
         rows.push(`
             <tr>
                 <td><input type="checkbox" value="${email.id}" ${isSelected ? 'checked' : ''} onchange="toggleEmailSelection(${email.id}, this.checked)"></td>
-                <td title="${escapeHtml(email.email)}">${escapeHtml(email.email.length > 30 ? email.email.substring(0, 30) + '...' : email.email)}</td>
+                <td title="${escapeHtml(email.email)}">${escapeHtml(displayEmail)}</td>
                 <td><span class="${statusClass}">${status}</span></td>
-                <td>${createdDisplay}</td>
+                <td>-</td>
                 <td>
                     <button onclick="deleteEmail(${email.id})" class="btn-danger btn-small">×</button>
                 </td>
@@ -97,9 +101,12 @@ function displayEmailTable(data) {
 }
 
 function updatePagination(data) {
-    document.getElementById('page-info').textContent = `Page ${data.page} of ${data.pages} (${data.total} total)`;
-    document.getElementById('prev-btn').disabled = data.page <= 1;
-    document.getElementById('next-btn').disabled = data.page >= data.pages;
+    const totalText = data.estimated ? 'many' : data.total?.toLocaleString() || 'unknown';
+    const pageText = data.hasMore ? `Page ${data.page} (${totalText} emails)` : `Page ${data.page} of ${data.page}`;
+    
+    document.getElementById('page-info').textContent = pageText;
+    document.getElementById('prev-btn').disabled = !data.prevPage;
+    document.getElementById('next-btn').disabled = !data.hasMore;
 }
 
 function changePage(direction) {
