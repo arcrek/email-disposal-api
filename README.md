@@ -28,7 +28,8 @@ public_html/
 │   ├── fast_load.php
 │   ├── quick_stats.php
 │   ├── save_emails.php
-│   └── bulk_operations.php
+│   ├── bulk_operations.php
+│   └── export_emails.php
 ├── data/
 │   └── email.txt
 ├── .htaccess
@@ -140,25 +141,22 @@ GET /api/email
 
 ## Admin Panel Features
 
-### Email Management
-- **View**: Real-time email list display
-- **Add**: Single email addition with validation
-- **Edit**: Direct text editing in textarea
-- **Save**: Atomic file operations with backup
-- **Import**: Bulk upload from .txt files
-- **Export**: Download current email list
-
 ### Statistics Dashboard
 - **Total Emails**: Complete email count
 - **Available**: Unlocked emails ready for use
 - **In Use**: Currently locked emails
-- **Auto-refresh**: Updates every 30 seconds
+- **Auto-refresh**: Updates every 60 seconds
 
-### File Operations
-- **Automatic Backup**: Creates timestamped backups
-- **Validation**: Email format checking
-- **Deduplication**: Removes duplicate entries
-- **Atomic Saves**: Prevents file corruption
+### Core Functions
+- **Export All Emails**: Download all emails from database as .txt file
+- **Import Emails**: Upload .txt file to append emails to database (no duplicates)
+- **Clear Locked Emails**: Unlock all currently locked emails for maintenance
+
+### Key Benefits
+- **Simplified Interface**: Clean, focused design without clutter
+- **Fast Loading**: Statistics-only display loads instantly
+- **Secure Operations**: All functions include validation and error handling
+- **Mobile Friendly**: Responsive design works on all devices
 
 ## Performance Features
 

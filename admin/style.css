@@ -29,7 +29,7 @@ h2 {
     padding-bottom: 5px;
 }
 
-.stats-panel, .email-panel {
+.stats-panel, .actions-panel {
     background: white;
     border-radius: 8px;
     padding: 20px;
@@ -57,136 +57,41 @@ h2 {
 .stat-available { background: #e8f5e8; }
 .stat-locked { background: #fff3e0; }
 
-.actions {
+.main-actions {
     display: flex;
-    gap: 10px;
-    margin-bottom: 15px;
-    flex-wrap: wrap;
+    flex-direction: column;
+    gap: 20px;
+    margin-bottom: 20px;
 }
 
-.add-email {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 15px;
-}
-
-#new-email {
-    flex: 1;
-    padding: 8px 12px;
+.action-group {
+    padding: 15px;
     border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 14px;
-}
-
-.search-section {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 15px;
-}
-
-#search-input {
-    flex: 1;
-    padding: 8px 12px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 14px;
-}
-
-.email-table-container {
-    margin-bottom: 15px;
-    overflow-x: auto;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-}
-
-#email-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 13px;
-    table-layout: fixed; /* Optimize rendering */
-}
-
-#email-table th:nth-child(1) { width: 40px; }
-#email-table th:nth-child(2) { width: auto; }
-#email-table th:nth-child(3) { width: 80px; }
-#email-table th:nth-child(4) { width: 120px; }
-#email-table th:nth-child(5) { width: 60px; }
-
-#email-table th,
-#email-table td {
-    padding: 8px 12px;
-    text-align: left;
-    border-bottom: 1px solid #eee;
-}
-
-#email-table th {
-    background: #f8f9fa;
-    font-weight: bold;
-    position: sticky;
-    top: 0;
-}
-
-#email-table tr:nth-child(even) {
+    border-radius: 6px;
     background: #f9f9f9;
 }
 
-#email-table tr:hover {
-    background: #f0f8ff;
+.action-group button {
+    width: 100%;
+    padding: 12px 20px;
+    font-size: 16px;
+    margin-bottom: 8px;
 }
 
-.status-available {
-    color: #4caf50;
-    font-weight: bold;
-}
-
-.status-locked {
-    color: #ff9800;
-    font-weight: bold;
-}
-
-.pagination {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 15px;
-    padding: 10px;
-    background: #f8f9fa;
-    border-radius: 4px;
-}
-
-.pagination button {
-    padding: 6px 12px;
+.action-description {
+    margin: 0;
     font-size: 13px;
+    color: #666;
+    text-align: center;
 }
 
-.pagination select {
-    padding: 6px 8px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 13px;
-}
-
-.bulk-actions {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    margin-bottom: 15px;
+.status-section {
+    text-align: center;
     padding: 10px;
-    background: #fff3cd;
-    border: 1px solid #ffeaa7;
-    border-radius: 4px;
+    min-height: 30px;
 }
 
-#selected-count {
-    font-weight: bold;
-    color: #856404;
-}
 
-.save-section {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-}
 
 /* Buttons */
 button {
@@ -263,11 +168,13 @@ button {
         padding: 15px;
     }
     
-    .actions {
+    #stats-content {
         flex-direction: column;
+        gap: 10px;
     }
     
-    .add-email {
-        flex-direction: column;
+    .action-group button {
+        font-size: 14px;
+        padding: 10px 16px;
     }
 }

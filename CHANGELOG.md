@@ -1,6 +1,54 @@
 # 📋 Email API Changelog
 
-## Version 2.0 - 1M+ Email Support (Latest)
+## Version 2.1 - Simplified Admin Panel (Latest)
+
+### 🎯 Admin Panel Redesign
+
+#### Interface Simplification
+- **Removed Email Table**: Eliminated complex email listing, pagination, and search functionality
+- **Statistics Focus**: Admin panel now shows only essential database statistics (like init.php)
+- **Three Core Functions**: Streamlined to Export, Import, and Clear Locked operations only
+- **Cleaner UI**: Modern action-group layout with clear descriptions for each function
+
+#### Enhanced Functionality
+- **Direct Export**: New `export_emails.php` endpoint for efficient database-to-file export
+- **Streamlined Import**: Simplified upload process that appends emails to database (no duplicates)
+- **Quick Operations**: All functions optimized for speed and reliability
+- **Mobile Responsive**: Improved responsive design for better mobile experience
+
+#### Technical Improvements
+- **Reduced Complexity**: Removed unused JavaScript functions and CSS rules
+- **Faster Loading**: Statistics-only interface loads instantly
+- **Better UX**: Clear action descriptions and status feedback
+- **Maintenance Ready**: Easy access to essential administrative functions
+
+### 📱 User Interface Updates
+
+#### New Layout Structure
+```html
+📊 Database Statistics (Total | Available | Locked)
+🔧 Three Main Actions:
+   - Export All Emails (.txt download)
+   - Import Emails (append to database)
+   - Clear Locked Emails (maintenance)
+```
+
+#### Removed Features
+- Email table display and pagination
+- Search functionality
+- Individual email management
+- Bulk selection and deletion
+- Complex sorting and filtering
+
+#### Benefits
+- **Simplified Workflow**: Focus on essential functions only
+- **Faster Performance**: No need to load large email lists
+- **Reduced Maintenance**: Less complex code to maintain
+- **Better Security**: Reduced attack surface with fewer features
+
+---
+
+## Version 2.0 - 1M+ Email Support
 
 ### 🚀 Major Performance Optimizations
 

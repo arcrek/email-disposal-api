@@ -1,154 +1,11 @@
-// Admin Panel JavaScript - Optimized for 1M+ emails
-let currentPage = 1;
-let pageSize = 100;
-let currentSearch = '';
-let selectedEmails = new Set();
-
-// Lightning-fast loading strategy
+// Simplified Admin Panel JavaScript - Statistics & Actions Only
 document.addEventListener('DOMContentLoaded', function() {
-    // Immediate loading with smaller page size for speed
-    pageSize = 50; // Start with smaller pages
-    
-    // Load stats and emails in parallel for faster perceived performance
-    Promise.all([
-        loadStats(),
-        loadEmails()
-    ]);
+    // Load stats on page load
+    loadStats();
     
     // Auto-refresh stats every 60 seconds
     setInterval(loadStats, 60000);
-    
-    // Optimized search with reduced delay for responsiveness
-    let searchTimeout;
-    document.getElementById('search-input').addEventListener('input', function() {
-        clearTimeout(searchTimeout);
-        searchTimeout = setTimeout(() => {
-            if (currentSearch !== this.value) {
-                currentSearch = this.value;
-                currentPage = 1;
-                loadEmails();
-            }
-        }, 600); // Reduced delay for faster response
-    });
 });
-
-async function loadEmails() {
-    try {
-        // Show loading state
-        const tbody = document.getElementById('email-table-body');
-        if (tbody.children.length === 1 && tbody.textContent.includes('Loading')) {
-            // Keep loading message for initial load
-        } else {
-            // Show quick loading for subsequent loads
-            tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 10px;">Updating...</td></tr>';
-        }
-        
-        const params = new URLSearchParams({
-            page: currentPage,
-            limit: pageSize,
-            search: currentSearch
-        });
-        
-        // Use fast endpoint for better performance
-        const response = await fetch(`fast_load.php?${params}`);
-        const result = await response.json();
-        
-        if (result.success) {
-            displayEmailTable(result.data);
-            updatePagination(result.data);
-        } else {
-            showStatus('Failed to load emails: ' + result.message, 'error');
-            tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 20px; color: #f44336;">Failed to load emails</td></tr>';
-        }
-    } catch (error) {
-        showStatus('Error loading emails: ' + error.message, 'error');
-        const tbody = document.getElementById('email-table-body');
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 20px; color: #f44336;">Connection error</td></tr>';
-    }
-}
-
-function displayEmailTable(data) {
-    const tbody = document.getElementById('email-table-body');
-    
-    if (data.emails.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5">No emails found</td></tr>';
-        return;
-    }
-    
-    // Ultra-fast rendering with minimal processing
-    const rows = [];
-    for (const email of data.emails) {
-        const status = email.status || (email.is_locked ? 'Locked' : 'Available');
-        const statusClass = email.statusClass || (email.is_locked ? 'status-locked' : 'status-available');
-        const isSelected = selectedEmails.has(parseInt(email.id));
-        const displayEmail = email.email.length > 35 ? email.email.substring(0, 35) + '...' : email.email;
-        
-        rows.push(`
-            <tr>
-                <td><input type="checkbox" value="${email.id}" ${isSelected ? 'checked' : ''} onchange="toggleEmailSelection(${email.id}, this.checked)"></td>
-                <td title="${escapeHtml(email.email)}">${escapeHtml(displayEmail)}</td>
-                <td><span class="${statusClass}">${status}</span></td>
-                <td>-</td>
-                <td>
-                    <button onclick="deleteEmail(${email.id})" class="btn-danger btn-small">×</button>
-                </td>
-            </tr>
-        `);
-    }
-    
-    tbody.innerHTML = rows.join('');
-    updateSelectedCount();
-}
-
-function updatePagination(data) {
-    const totalText = data.estimated ? 'many' : data.total?.toLocaleString() || 'unknown';
-    const pageText = data.hasMore ? `Page ${data.page} (${totalText} emails)` : `Page ${data.page} of ${data.page}`;
-    
-    document.getElementById('page-info').textContent = pageText;
-    document.getElementById('prev-btn').disabled = !data.prevPage;
-    document.getElementById('next-btn').disabled = !data.hasMore;
-}
-
-function changePage(direction) {
-    const newPage = currentPage + direction;
-    if (newPage >= 1) {
-        currentPage = newPage;
-        loadEmails();
-    }
-}
-
-function changePageSize() {
-    pageSize = parseInt(document.getElementById('page-size').value);
-    currentPage = 1;
-    loadEmails();
-}
-
-function toggleEmailSelection(emailId, isSelected) {
-    if (isSelected) {
-        selectedEmails.add(emailId);
-    } else {
-        selectedEmails.delete(emailId);
-    }
-    updateSelectedCount();
-}
-
-function toggleAllEmails(checkbox) {
-    const emailCheckboxes = document.querySelectorAll('#email-table tbody input[type="checkbox"]');
-    emailCheckboxes.forEach(cb => {
-        const emailId = parseInt(cb.value);
-        cb.checked = checkbox.checked;
-        if (checkbox.checked) {
-            selectedEmails.add(emailId);
-        } else {
-            selectedEmails.delete(emailId);
-        }
-    });
-    updateSelectedCount();
-}
-
-function updateSelectedCount() {
-    document.getElementById('selected-count').textContent = `${selectedEmails.size} selected`;
-}
 
 async function loadStats() {
     try {
@@ -179,110 +36,7 @@ async function loadStats() {
     }
 }
 
-async function addEmail() {
-    const emailInput = document.getElementById('new-email');
-    const email = emailInput.value.trim();
-    
-    if (!email || !isValidEmail(email)) {
-        showStatus('Please enter a valid email address', 'error');
-        return;
-    }
-    
-    try {
-        const response = await fetch('bulk_operations.php', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                operation: 'bulk_add',
-                emails: [email]
-            })
-        });
-        
-        const data = await response.json();
-        
-        if (data.success) {
-            showStatus(`Email added successfully`, 'success');
-            emailInput.value = '';
-            loadEmails(); // Refresh current page
-            loadStats(); // Update stats
-        } else {
-            showStatus('Failed to add email: ' + data.message, 'error');
-        }
-    } catch (error) {
-        showStatus('Error adding email: ' + error.message, 'error');
-    }
-}
 
-async function bulkDeleteSelected() {
-    if (selectedEmails.size === 0) {
-        showStatus('No emails selected', 'error');
-        return;
-    }
-    
-    if (!confirm(`Delete ${selectedEmails.size} selected emails? This cannot be undone.`)) {
-        return;
-    }
-    
-    try {
-        const response = await fetch('bulk_operations.php', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                operation: 'bulk_delete',
-                email_ids: Array.from(selectedEmails)
-            })
-        });
-        
-        const data = await response.json();
-        
-        if (data.success) {
-            showStatus(`Deleted ${data.count} emails successfully`, 'success');
-            selectedEmails.clear();
-            loadEmails(); // Refresh current page
-            loadStats(); // Update stats
-        } else {
-            showStatus('Failed to delete emails: ' + data.message, 'error');
-        }
-    } catch (error) {
-        showStatus('Error deleting emails: ' + error.message, 'error');
-    }
-}
-
-async function deleteEmail(emailId) {
-    if (!confirm('Delete this email? This cannot be undone.')) {
-        return;
-    }
-    
-    try {
-        const response = await fetch('bulk_operations.php', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                operation: 'bulk_delete',
-                email_ids: [emailId]
-            })
-        });
-        
-        const data = await response.json();
-        
-        if (data.success) {
-            showStatus('Email deleted successfully', 'success');
-            selectedEmails.delete(emailId);
-            loadEmails(); // Refresh current page
-            loadStats(); // Update stats
-        } else {
-            showStatus('Failed to delete email: ' + data.message, 'error');
-        }
-    } catch (error) {
-        showStatus('Error deleting email: ' + error.message, 'error');
-    }
-}
 
 async function clearLocked() {
     if (!confirm('Clear all locked emails? This will unlock all currently locked emails.')) {
@@ -304,7 +58,6 @@ async function clearLocked() {
         
         if (data.success) {
             showStatus(`Unlocked ${data.count} emails`, 'success');
-            loadEmails(); // Refresh current page
             loadStats(); // Update stats
         } else {
             showStatus('Failed to clear locks: ' + data.message, 'error');
@@ -314,34 +67,16 @@ async function clearLocked() {
     }
 }
 
-function searchEmails() {
-    currentSearch = document.getElementById('search-input').value.trim();
-    currentPage = 1;
-    loadEmails();
-}
 
-async function exportEmails() {
+
+function exportEmails() {
     try {
         showStatus('Preparing export...', 'success');
         
-        // Export all emails (could be large file)
-        const response = await fetch('load_emails.php'); // Use old endpoint for full export
-        const data = await response.json();
+        // Direct download all emails as txt file
+        window.open('export_emails.php', '_blank');
         
-        if (data.success) {
-            const content = data.emails.join('\n');
-            const blob = new Blob([content], { type: 'text/plain' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'emails_' + new Date().toISOString().split('T')[0] + '.txt';
-            a.click();
-            window.URL.revokeObjectURL(url);
-            
-            showStatus(`Exported ${data.emails.length} emails`, 'success');
-        } else {
-            showStatus('Failed to export emails', 'error');
-        }
+        showStatus('Export started - check your downloads', 'success');
     } catch (error) {
         showStatus('Error exporting emails: ' + error.message, 'error');
     }
@@ -388,7 +123,6 @@ async function importEmails(input) {
             
             if (data.success) {
                 showStatus(`Imported ${data.count} emails successfully`, 'success');
-                loadEmails(); // Refresh current page
                 loadStats(); // Update stats
             } else {
                 showStatus('Failed to import: ' + data.message, 'error');
@@ -407,16 +141,7 @@ function isValidEmail(email) {
     return re.test(email);
 }
 
-function escapeHtml(text) {
-    const map = {
-        '&': '&amp;',
-        '<': '&lt;',
-        '>': '&gt;',
-        '"': '&quot;',
-        "'": '&#039;'
-    };
-    return text.replace(/[&<>"']/g, function(m) { return map[m]; });
-}
+
 
 function showStatus(message, type) {
     const statusElement = document.getElementById('save-status');
