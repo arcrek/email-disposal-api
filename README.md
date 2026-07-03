@@ -17,7 +17,7 @@ The SQLite database is stored at `data/emails.sqlite` through the Compose volume
 
 ## Data
 
-The app creates the SQLite schema automatically, but it does not import `data/email.txt` or `data/emails.txt` on startup. Import emails from the admin panel.
+The app creates the SQLite schema automatically.
 
 ## API
 

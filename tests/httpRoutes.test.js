@@ -2,6 +2,7 @@ import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import EventEmitter from 'node:events';
+import { Readable } from 'node:stream';
 import { afterEach, describe, expect, it } from 'vitest';
 import httpMocks from 'node-mocks-http';
 import { createApp } from '../src/app.js';
@@ -28,6 +29,33 @@ async function request(app, method, url, body) {
   }, {
     eventEmitter: EventEmitter
   });
+
+  await new Promise((resolve) => {
+    res.on('end', resolve);
+    app.handle(req, res);
+  });
+
+  return {
+    statusCode: res.statusCode,
+    headers: res._getHeaders(),
+    payload: res._getData()
+  };
+}
+
+async function requestRawJson(app, method, url, body) {
+  const payload = JSON.stringify(body);
+  const req = Readable.from([Buffer.from(payload)]);
+  Object.assign(req, {
+    method,
+    url,
+    originalUrl: url,
+    headers: {
+      'content-type': 'application/json',
+      'content-length': String(Buffer.byteLength(payload))
+    },
+    socket: {}
+  });
+  const res = httpMocks.createResponse({ eventEmitter: EventEmitter, req });
 
   await new Promise((resolve) => {
     res.on('end', resolve);
@@ -116,6 +144,22 @@ describe('http routes', () => {
     expect(parseJson(deleteResponse)).toMatchObject({ success: true, count: 2 });
 
     expect(store.getStats()).toMatchObject({ total: 0, available: 0, locked: 0 });
+
+    store.close();
+  });
+
+  it('accepts admin bulk import requests larger than 1mb', async () => {
+    const { app, store } = createTestApp();
+    const emails = Array.from({ length: 45_000 }, (_, index) => `user${index}@example.com`);
+
+    const response = await requestRawJson(app, 'POST', '/admin/bulk_operations.php', {
+      operation: 'bulk_add',
+      emails
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(parseJson(response)).toMatchObject({ success: true, count: emails.length });
+    expect(store.getStats()).toMatchObject({ total: emails.length });
 
     store.close();
   });
