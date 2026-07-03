@@ -13,7 +13,7 @@
     "express": "^4.21.2"
   },
   "devDependencies": {
-    "supertest": "^7.0.0",
+    "node-mocks-http": "^1.17.2",
     "vitest": "^2.1.8"
   }
 }
