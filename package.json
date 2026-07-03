@@ -1,0 +1,19 @@
+{
+  "name": "email-disposal-api",
+  "version": "2.0.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "start": "node src/server.js",
+    "test": "vitest run",
+    "lint": "node --check src/server.js && node --check src/app.js && node --check src/db.js && node --check src/emailStore.js"
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.9.1",
+    "express": "^4.21.2"
+  },
+  "devDependencies": {
+    "supertest": "^7.0.0",
+    "vitest": "^2.1.8"
+  }
+}
