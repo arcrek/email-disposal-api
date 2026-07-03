@@ -1,4 +1,4 @@
-import { mkdtempSync, rmSync } from 'node:fs';
+import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import EventEmitter from 'node:events';
@@ -116,6 +116,19 @@ describe('http routes', () => {
     expect(parseJson(deleteResponse)).toMatchObject({ success: true, count: 2 });
 
     expect(store.getStats()).toMatchObject({ total: 0, available: 0, locked: 0 });
+
+    store.close();
+  });
+
+  it('serves admin UI with delete all emails action', async () => {
+    const { app, store } = createTestApp();
+
+    const response = await request(app, 'GET', '/admin/');
+    const adminHtml = readFileSync(path.resolve('admin/index.html'), 'utf8');
+
+    expect(response.statusCode).toBe(200);
+    expect(adminHtml).toContain('Delete All Emails');
+    expect(adminHtml).toContain('deleteAllEmails()');
 
     store.close();
   });

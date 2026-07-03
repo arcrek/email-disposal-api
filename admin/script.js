@@ -68,6 +68,36 @@ async function clearLocked() {
 }
 
 
+async function deleteAllEmails() {
+    if (!confirm('Delete all emails? This permanently removes every email from the database.')) {
+        return;
+    }
+    
+    try {
+        const response = await fetch('bulk_operations.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                operation: 'delete_all'
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            showStatus(`Deleted ${data.count} emails`, 'success');
+            loadStats();
+        } else {
+            showStatus('Failed to delete emails: ' + data.message, 'error');
+        }
+    } catch (error) {
+        showStatus('Error deleting emails: ' + error.message, 'error');
+    }
+}
+
+
 
 function exportEmails() {
     try {
