@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node src/server.js",
     "test": "vitest run",
-    "lint": "node --check src/server.js && node --check src/app.js && node --check src/db.js && node --check src/emailStore.js"
+    "lint": "node --check src/server.js && node --check src/app.js && node --check src/db.js && node --check src/emailStore.js && node --check src/routes/api.js && node --check src/routes/admin.js"
   },
   "dependencies": {
     "better-sqlite3": "^11.9.1",
